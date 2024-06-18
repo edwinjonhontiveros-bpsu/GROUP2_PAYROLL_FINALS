@@ -8,7 +8,7 @@ namespace Payroll_System
     public partial class Employees : UserControl
     {
 
-        OleDbConnection con = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=GROUP2_PAYROLL_FINALS.accdb");
+        private OleDbConnection cn = new OleDbConnection();
 
         public Employees()
         {
@@ -18,7 +18,16 @@ namespace Payroll_System
 
         private void Employees_Load(object sender, EventArgs e)
         {
-
+            try
+            {
+                cn.ConnectionString = @"Provider = Microsoft.ACE.OLEDB.12.0; Data Source = GROUP2_PAYROLL_FINALS.accdb; Persist Security Info = False;";
+                cn.Open();
+                cn.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex);
+            }
         }
         private void AddControls(UserControl F)
         {
@@ -40,13 +49,40 @@ namespace Payroll_System
 
         private void button4_Click(object sender, EventArgs e)
         {
-            OleDbCommand cmd = con.CreateCommand();
-            con.Open();
-            cmd.CommandText = "Insert into employeeList(lname, fname, mname, address, birthdate, gender, marital, tel, mobile, email, joindate, position, basicrate)Values('" + textBox4.Text + "','" + textBox2.Text + "','" + textBox3.Text + "','" + textBox5.Text + "','" + dob.Text + "','" + GenderCb.Text + "','" + StatusCb.Text + "','" + textBox8.Text + "','" + textBox7.Text + "','" + textBox6.Text + "','" + dateTimePicker1.Text + "','" + comboBox2.Text + "','" + textBox9.Text + "')";
-            cmd.Connection = con;
-            cmd.ExecuteNonQuery();
-            MessageBox.Show("Record Submitted", "Congrats");
-            con.Close();
+            try
+            {
+
+                cn.Open();
+
+                OleDbCommand cmd = new OleDbCommand();
+                cmd.Connection = cn;
+
+                string q = "INSERT INTO employeeList (lname, fname, mname, address, birthdate, gender, marital, tel, mobile, email, joindate, position, basicrate) VALUES (@LName, @FName, @MName, @Addr, @Bday, @Gndr, @Mrtl, @Tel, @Mob, @Eml, @Joindt, @Pos, @BRate)";
+
+                cmd.Parameters.AddWithValue("@LName", OleDbType.VarChar).Value = textBox4.Text;
+                cmd.Parameters.AddWithValue("@FName", OleDbType.VarChar).Value = textBox2.Text;
+                cmd.Parameters.AddWithValue("@MName", OleDbType.VarChar).Value = textBox3.Text;
+                cmd.Parameters.AddWithValue("@Addr", OleDbType.LongVarChar).Value = textBox5.Text;
+                cmd.Parameters.AddWithValue("@Bday", OleDbType.Date).Value = dob.Value;
+                cmd.Parameters.AddWithValue("@Gndr", OleDbType.VarChar).Value = GenderCb.Text;
+                cmd.Parameters.AddWithValue("@Mrtl", OleDbType.VarChar).Value = StatusCb.Text;
+                cmd.Parameters.AddWithValue("@Tel", OleDbType.VarChar).Value = textBox8.Text;
+                cmd.Parameters.AddWithValue("@Mob", OleDbType.VarChar).Value = textBox7.Text;
+                cmd.Parameters.AddWithValue("@Eml", OleDbType.VarChar).Value = textBox6.Text;
+                cmd.Parameters.AddWithValue("@Joindt", OleDbType.Date).Value = dateTimePicker1.Value;
+                cmd.Parameters.AddWithValue("@Pos", OleDbType.VarChar).Value = comboBox2.Text;
+                cmd.Parameters.AddWithValue("@BRate", OleDbType.Double).Value = textBox9.Text;
+
+                cmd.CommandText = q;
+                cmd.ExecuteNonQuery();
+                cn.Close();
+
+                MessageBox.Show("Employee record has been saved.", "Record Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            } catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex);
+            }
         }
     }
 }
